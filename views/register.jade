@@ -2,18 +2,26 @@ extends layout
 
 block content
 	div.container
-		div.row
-			div.col-sm-6.col-md-4.col-md-offset-4
-				h1.text-center.login-title Registration Details
-					div.signup-wall
-						form(class='form-signin', action='/signup', method='POST')
-							input(type='text', name='username', class='form-control', placeholder='Username',required, autofocus)
-							input(type='password', name='password', class='form-control nomargin', placeholder='Password', required)
-							input(type='email', name='email', class='form-control', placeholder='Email',required)
-							input(type='text', name='firstName', class='form-control', placeholder='First Name',required)
-							input(type='text', name='lastName', class='form-control', placeholder='Last Name',required)
-							button(class='btn btn-lg btn-primary btn-block', type='submit') Register
-							span.clearfix
-					#message
-						if message
-							h1.text-center.error-message #{message}
+		div.row.row-centered
+			div.col-xs-6.col-centered
+				h1.login-title Registration
+				div.account-wall
+					form(class='form-signin', action='/signup', method='POST')
+						div.form-group
+							label(for='username') Email address
+							input(type='email', id='username', name='username', class='form-control', placeholder='Email',required)
+						div.form-group
+							label(for='password') Password
+							input(type='password', id='password', name='password', class='form-control nomargin', placeholder='Password', required)
+						div.form-group
+							label(for='fn') First Name
+							input(type='text', id='fn', name='firstName', class='form-control', placeholder='First Name',required)
+						div.form-group
+							label(for='ln') Last Name
+							input(type='text', id='ln', name='lastName', class='form-control', placeholder='Last Name',required)
+						button(class='btn btn-primary', type='submit') Register
+						span.clearfix
+				#message
+				if message
+					h1.text-center.error-message #{message}
+

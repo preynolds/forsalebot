@@ -2,7 +2,24 @@ doctype html
 html
   head
     title= title
+    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
+    link(rel='stylesheet', href='//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css')
+    //- link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Shadows+Into+Light|Architects+Daughter|Roboto:400,700', type='text/css')
     link(rel='stylesheet', href='/stylesheets/style.css')
-    link(rel='stylesheet', href='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css')
+    script(src='//code.jquery.com/jquery-1.11.2.min.js')
   body
     block content
+    
+    script(src='//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js')
+    script(src='//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js')
+    //- script(src='/scripts/react-with-addons.js')
+    //- script(src='/scripts/build/hw.js')
+
+    script(type='text/javascript').
+      $(document).ready(function() {
+        $('.selectpicker').selectpicker({
+          style: 'btn-default',
+          size: false
+        });
+      });
+      

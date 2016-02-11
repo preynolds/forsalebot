@@ -1,15 +1,189 @@
 extends layout
 
 block content
+
+	include header
+
 	div.container
 		div.row
-			div.col-sm-6.col-md-4.col-md-offset-4
-				#user
-					h1.text-center.login-title Welcome #{user.firstName}. Check your details below:
-						div.signup-wall
-							ul.user-details
-								li Username ---> #{user.username}
-								li Email    ---> #{user.email}
-								li First Name ---> #{user.firstName} 
-								li Last Name ---> #{user.lastName}
-						a(href='/signout', class='text-center new-account') Sign Out
+			div.col-md-4.col-md-offset-1
+				h3 New Search Job
+				form#search(action='', method='POST')
+					div.form-group
+						label(for='needle') Search query
+						input(type='text', id='needle', name='needle' class='form-control', placeholder='', required, autofocus)
+					div.form-group
+						label(for='name') Name your search query
+						input(type='text', id='name', name='name' class='form-control', placeholder='', required)
+					div.form-group
+						label(for='forums') Forums to search
+						select(multiple, name='forums[]', class='selectpicker')
+							option(value="noop", disabled) Helifreak
+							each f in forums
+								if(f.provider.name == "helifreak")
+									option(value=f._id)= f.title
+							option(value="noop", disabled)= "  "
+							option(value="noop", disabled) RC Groups
+							each f in forums
+								if(f.provider.name == "rcgroups")
+									option(value=f._id)= f.title
+
+					button(class='btn btn-primary', id='newsearch', type='submit') Save
+				br
+				br
+				form#clear-results(action='', method='GET')
+					button(class='btn btn-primary', id='fds', type='submit') Clear Results
+				br
+				br
+				form#clear-results(action='', method='GET')
+					button(class='btn btn-primary', id='gfd', type='submit') Clear Searches
+
+				span.clearfix
+
+			div#searches.col-md-4.col-md-offset-2
+				h3 Saved searches
+				div#search-list
+					each task in user.tasks
+
+						div(class="search #{task.forum.provider.name}", id="#{task._id}")
+							if(task.forum.provider.name == "rcgroups")
+								div(class="provider")= "RCG"
+							if(task.forum.provider.name == "helifreak")
+								div(class="provider")= "HF"
+							div(class="title")= task.name
+							div(class="confirm") confirm
+							div(class="delete")= "x"
+							div(class="needle")= "query: " + task.needle
+							div(class="forum")= "forum: " + task.forum.title
+							//- if(task.results.length > 0)
+							//- 	div(class="results")= task.results.length
+
+
+					// Deep populate forum and results
+
+	script.
+
+		$(document).ready(function() {
+
+			var confirmDel = function(tid) {
+				$.ajax({
+					url: '/api/deletetask/'+tid,
+					type: 'DELETE',
+					dataType: 'json',
+					cache: false,
+					data: tid,
+					success: function(data){
+						$('#'+data._id).remove();
+					},
+					error: function(jqXHR, textStatus, err){
+						console.log('text status '+textStatus+', err '+err);
+					}
+				})
+			}
+
+			var addListeners = function () {
+				$("#searches").find("div.search").click(function(e) {
+					if(e.target.className == "delete") {
+						this.classList.add("show-confirm");
+						var that = this;
+						setTimeout(function(){
+							that.classList.remove("show-confirm");
+						}, 5000)
+					}
+
+					if(e.target.className == "confirm") {
+						confirmDel(this.id);
+					}
+				});
+			}
+			addListeners();
+
+			var taskFactory = function(task) {
+				var el = '<div id="'+task._id+'" class="search "'+task.forum.provider.name+'">';
+
+				if(task.forum.provider.name == "rcgroups") {
+					el += '<div class="provider">RCG</div>';
+				}
+
+				if(task.forum.provider.name == "helifreak") {
+					el += '<div class="provider">HF</div>';
+				}
+
+				el += '<div class="title">'+task.name+'</div>';
+				el += '<div class="confirm">confirm</div>';
+				el += '<div class="delete">x</div>';
+				el += '</div>';
+				return el;
+			}
+
+			var updateSearchList = function (data) {
+				$.ajax({
+					url: '/api/userandtasks/'+'#{user._id}',
+					type: 'GET',
+					dataType: 'json',
+					cache: false,
+					data: data,
+					success: function(data){
+						var list = '';
+						$.each( data.tasks, function( key, value ) {
+							console.log(key, value);
+							list += taskFactory(value);
+						});
+						$('#search-list').html(list);
+						addListeners();
+					},
+					error: function(jqXHR, textStatus, err){
+						console.log('text status '+textStatus+', err '+err);
+					}
+				})
+			}
+
+			$("form#search").submit(function(e) {
+				e.preventDefault();
+				var data = $(this).serializeArray();
+				// Validation code here
+				console.log(data);
+				$.ajax({
+					url: '/ajax',
+					type: 'POST',
+					dataType: 'json',
+					cache: false,
+					data: data,
+					success: function(data){
+						updateSearchList(data);
+					},
+					error: function(jqXHR, textStatus, err){
+						console.log('text status '+textStatus+', err '+err);
+					}
+				})
+			});
+
+			$("#clear-results").submit(function(e) {
+				e.preventDefault();
+				$.ajax({
+					url: '/api/clear-results',
+					type: 'GET',
+					success: function(data){
+						updateSearchList(data);
+					},
+					error: function(jqXHR, textStatus, err){
+						console.log('text status '+textStatus+', err '+err);
+					}
+				})
+			});
+
+			$("#clear-searches").submit(function(e) {
+				e.preventDefault();
+				$.ajax({
+					url: '/api/clear-searches',
+					type: 'GET',
+					success: function(data){
+						updateSearchList(data);
+					},
+					error: function(jqXHR, textStatus, err){
+						console.log('text status '+textStatus+', err '+err);
+					}
+				})
+			});
+
+		});
